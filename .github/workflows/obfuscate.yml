@@ -1,0 +1,68 @@
+name: JS Obfuscate - build dist
+
+on:
+  push:
+    branches: [ "main" ]    # 推送到 main 时触发
+  release:
+    types: [published]     # 发布 release 时触发
+
+jobs:
+  obfuscate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js (用于可能的 build 脚本 / npm)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies (optional)
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          fi
+
+      # 如果你的项目需要先构建（例如 TypeScript -> JS），在此处添加构建步骤
+      # - name: Build project
+      #   run: npm run build
+
+      - name: Create dist directory
+        run: mkdir -p dist
+
+      - name: Obfuscate JS (javascript-obfuscator action)
+        uses: KevinRohn/github-action-javascript-obfuscator@v1
+        with:
+          # 必需：输入路径可以是单文件或目录（支持 glob）
+          input_path: "src"
+          # 必需：输出位置
+          output_path: "dist"
+          # 常用选项示例（可按需调整/删除）
+          options_preset: "medium-obfuscation"
+          compact: true
+          control_flow_flattening: true
+          control_flow_flattening_threshold: 0.75
+          dead_code_injection: true
+          dead_code_injection_threshold: 0.4
+          debug_protection: false
+          disable_console_output: true
+          string_array: true
+          string_array_encoding: "rc4"
+          string_array_threshold: 0.9
+          string_array_rotate: true
+          string_array_shuffle: true
+          simplify: true
+          source_map: false
+          target: "node"
+
+      - name: List dist (for debug)
+        run: ls -R dist
+
+      - name: Upload obfuscated dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: obfuscated-dist
+          path: dist
