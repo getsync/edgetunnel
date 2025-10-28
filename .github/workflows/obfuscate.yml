@@ -39,7 +39,7 @@ jobs:
           # 必需：输入路径可以是单文件或目录（支持 glob）
           input_path: "_worker.js"
           # 必需：输出位置
-          output_path: "worker.js"
+          output_path: "dist"
           # 常用选项示例（可按需调整/删除）
           options_preset: "medium-obfuscation"
           compact: true
